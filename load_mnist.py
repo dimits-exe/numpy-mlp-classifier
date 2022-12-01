@@ -26,21 +26,21 @@ def load_data() -> Data:
     """
     data = mnist.load_data()
 
-    x_train = rescale_data(array_to_vector(data[0][0]))
+    x_train = _rescale_data(_array_to_vector(data[0][0]))
     y_train = data[0][1]
-    x_test = rescale_data(array_to_vector(data[1][0]))
+    x_test = _rescale_data(_array_to_vector(data[1][0]))
     y_test = data[1][1]
 
-    x_train, y_train = filter_data(x_train, y_train)
-    x_test, y_test = filter_data(x_test, y_test)
+    x_train, y_train = _filter_data(x_train, y_train)
+    x_test, y_test = _filter_data(x_test, y_test)
 
-    x_train, x_valid, = split_to_validation(x_train)
-    y_train, y_valid = split_to_validation(y_train)
+    x_train, x_valid, = _split_to_validation(x_train)
+    y_train, y_valid = _split_to_validation(y_train)
 
     return Data(x_train, y_train, x_test, y_test, x_valid, y_valid)
 
 
-def filter_data(data: np.ndarray, labels: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def _filter_data(data: np.ndarray, labels: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """
     Delete records from the data and label vectors that are not "5" or "6"
     :param data: a vector containing the data
@@ -53,7 +53,7 @@ def filter_data(data: np.ndarray, labels: np.ndarray) -> tuple[np.ndarray, np.nd
     return data, labels
 
 
-def split_to_validation(array: np.ndarray, split_perc: float = 0.2) -> tuple[np.ndarray, np.ndarray]:
+def _split_to_validation(array: np.ndarray, split_perc: float = 0.2) -> tuple[np.ndarray, np.ndarray]:
     """
     Split data into training and validation data.
     :param array: the data
@@ -64,7 +64,7 @@ def split_to_validation(array: np.ndarray, split_perc: float = 0.2) -> tuple[np.
     return array[validation_value_count:], array[:validation_value_count]
 
 
-def array_to_vector(array: np.ndarray):
+def _array_to_vector(array: np.ndarray):
     """
     Converts an array holding k mxn sized matrices into an array containing k vectors.
     :param array: the array holding the matrices
@@ -73,7 +73,7 @@ def array_to_vector(array: np.ndarray):
     return np.reshape(array, (array.shape[0], array.shape[1] * array.shape[2]))
 
 
-def rescale_data(array: np.ndarray):
+def _rescale_data(array: np.ndarray):
     """
     Rescales all elements of the array so they lie in the [0,1] range
     :param array: the data
