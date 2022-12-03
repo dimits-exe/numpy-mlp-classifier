@@ -11,7 +11,7 @@ class LogisticRegClassifier:
         self.weights = None
 
     def train(self, train_data, train_labels) -> list[float]:
-        initial_weights = np.zeroes(train_data.shape[1]).reshape((-1, 1))
+        initial_weights = np.zeros(train_data.shape[1]).reshape((-1, 1))
         self.weights, cost_his = LogisticRegClassifier._gradient_ascent(train_data, train_labels, initial_weights,
                                                                         self.lamda, self.alpha, self.iters,
                                                                         self.print_history)
@@ -36,7 +36,7 @@ class LogisticRegClassifier:
         regularization = 1 / (2 * m) * lamda * np.sum(theta ** 2)
         # why did we apply a '-' here?
         current_j = (1.0 / m) * ((-y).dot(np.log(h)) - (1 - y).T.dot(np.log(1 - h))) + regularization
-
+        y = y.reshape(y.shape[0], 1)
         regularization = lamda * theta / m  # why do we divide by m?
         gradient = (1.0 / m) * x.T.dot(h - y) + regularization
         return current_j, gradient
@@ -52,6 +52,7 @@ class LogisticRegClassifier:
 
             if print_results:
                 print(error)
+
             cost_history.append(error[0])
 
         return theta, cost_history
