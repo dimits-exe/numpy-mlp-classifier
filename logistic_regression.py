@@ -31,15 +31,14 @@ class LogisticRegClassifier:
     @classmethod
     def _cost_gradient(cls, x: np.ndarray, y: np.ndarray, theta: np.ndarray, lamda: float) \
             -> tuple[np.ndarray, np.ndarray]:
-        m = float(x.shape[0])
-
         h = sigmoid(x.dot(theta))
-        regularization = 1 / (2 * m) * lamda * np.sum(theta ** 2)
-        # why did we apply a '-' here?
-        current_cost = (1.0 / m) * ((-y).dot(np.log(h)) - (1 - y).T.dot(np.log(1 - h))) + regularization
+        regularization = (lamda / 2.0) * np.sum(theta ** 2)
+
+        current_cost = (y.T.dot(np.log(h)) + (1 - y).T.dot(np.log(1 - h))) - regularization
         y = y.reshape(y.shape[0], 1)  # prevent numpy broadcast to 2d array
-        regularization = lamda * theta / m  # why do we divide by m?
-        gradient = ((1.0 / m) * x.T.dot(h - y)) + regularization
+
+        regularization = lamda * theta
+        gradient = x.T.dot(y-h) - regularization
         return current_cost, gradient
 
     @classmethod
@@ -49,25 +48,28 @@ class LogisticRegClassifier:
 
         for i in range(iters):
             error, gradient = LogisticRegClassifier._cost_gradient(x, y, theta, lamda)
-            theta -= alpha * gradient  # addition because we are ascending
-
-            if print_results and i % 100 == 0:
-                print("Iteration ", i, " Error:", error)
 
             cost_history.append(error[0])
+            theta -= alpha * gradient  # addition because we are ascending
+
+            if print_results and i % 1 == 0:
+                print("Iteration ", i, " Error:", error)
 
         return theta, cost_history
 
 
 def sigmoid(x: np.ndarray) -> np.ndarray:
-    return 1.0 / (1.0 + np.exp(x))
+    return 1.0 / (1.0 + np.exp(-x))
 
 
 def main():
-    classifier = LogisticRegClassifier(iters=500, alpha=0.01, lamda=0.1, print_history=True)
+    np.seterr(all='raise')
+
+    classifier = LogisticRegClassifier(iters=50, alpha=0.01, lamda=0.9, print_history=True)
     data = load_mnist.load_data()
 
-    cost_history = classifier.train(data.x_train, data.y_train)
+    y = np.where(data.y_train == 5, 0, 1)
+    cost_history = classifier.train(data.x_train, y)
     print(cost_history)
 
     labels, probabilities = classifier.predict(data.x_test)
