@@ -33,12 +33,12 @@ class LoadTest(TestCase):
         assert np.all((self.mnist_data.x_valid >= 0) & (self.mnist_data.x_valid <= 1))
 
     def test_label_range(self):
-        assert np.min(self.mnist_data.y_train) == 5
-        assert np.max(self.mnist_data.y_train) == 6
-        assert np.min(self.mnist_data.y_test) == 5
-        assert np.max(self.mnist_data.y_test) == 6
-        assert np.min(self.mnist_data.y_valid) == 5
-        assert np.max(self.mnist_data.y_valid) == 6
+        assert np.min(self.mnist_data.y_train) == 0
+        assert np.max(self.mnist_data.y_train) == 1
+        assert np.min(self.mnist_data.y_test) == 0
+        assert np.max(self.mnist_data.y_test) == 1
+        assert np.min(self.mnist_data.y_valid) == 0
+        assert np.max(self.mnist_data.y_valid) == 1
 
     def test_validation_size(self):
         assert np.isclose(len(self.mnist_data.x_train), len(self.mnist_data.x_valid) * 5, rtol=2)

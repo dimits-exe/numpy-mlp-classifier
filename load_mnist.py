@@ -37,7 +37,20 @@ def load_data() -> Data:
     x_train, x_valid, = _split_to_validation(x_train)
     y_train, y_valid = _split_to_validation(y_train)
 
+    y_train = _get_binary_labels(y_train)
+    y_test = _get_binary_labels(y_test)
+    y_valid = _get_binary_labels(y_valid)
+
     return Data(x_train, y_train, x_test, y_test, x_valid, y_valid)
+
+
+def _get_binary_labels(labels: np.ndarray) -> np.ndarray:
+    """
+    Get a binary numpy array where the ith element is 0 if it was "5" and 1 otherwise
+    :param labels: a numpy array containing the data's labels
+    :return: a binary numpy array
+    """
+    return np.where(labels == 5, 0, 1)
 
 
 def _filter_data(data: np.ndarray, labels: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
