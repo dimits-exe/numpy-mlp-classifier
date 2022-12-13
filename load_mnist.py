@@ -18,13 +18,20 @@ class Data:
                 f"Validation: {self.x_valid.shape} with {self.y_valid.shape} labels\n"
 
 
-def load_data() -> Data:
+def load_data(seed: int = -1) -> Data:
     """
     Load the MNIST dataset, filter out data that aren't "5" or "6", rescale their values and returns the train,
     test and validation data for the MLP as 784 pixel vectors.
     :return a Data object holding the train test and validation data
     """
+    if seed != -1:
+        np.random.seed(seed)
+
     data = mnist.load_data()
+
+    # randomly shuffle all arrays
+    for example_category in data:
+        _reshuffle_data(example_category[0], example_category[1])
 
     x_train = _rescale_data(_array_to_vector(data[0][0]))
     y_train = data[0][1]
@@ -42,6 +49,19 @@ def load_data() -> Data:
     y_valid = _get_binary_labels(y_valid)
 
     return Data(x_train, y_train, x_test, y_test, x_valid, y_valid)
+
+
+def _reshuffle_data(data: np.ndarray, labels: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Reshuffle the data and its labels while preserving the relations between them.
+    :param data: a numpy array containing the data
+    :param labels: a numpy array containing the data's labels
+    :return: the same arrays, reshuffled
+    """
+    # this does create and return copies, but shouldn't be a problem
+    assert len(data) == len(labels)
+    indexes = np.random.permutation(len(data))
+    return data[indexes], labels[indexes]
 
 
 def _get_binary_labels(labels: np.ndarray) -> np.ndarray:
@@ -88,7 +108,7 @@ def _array_to_vector(array: np.ndarray):
 
 def _rescale_data(array: np.ndarray):
     """
-    Rescales all elements of the array so they lie in the [0,1] range
+    Rescales all elements of the array, so they lie in the [0,1] range
     :param array: the data
     :return: the rescaled data
     """
