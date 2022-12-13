@@ -70,7 +70,7 @@ for i, lamda in enumerate(lamda_values):
 
 best_index = accuracy.argmax()
 best_lambda = lamda_values[best_index]
-print(f"Best lambda value {best_lambda} with test accuracy={accuracy[best_index]}")
+print(f"Best lambda value {best_lambda} with validation accuracy={accuracy[best_index]}")
 
 # Test on optimal lambda
 

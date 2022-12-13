@@ -42,5 +42,3 @@ class LoadTest(TestCase):
 
     def test_validation_size(self):
         assert np.isclose(len(self.mnist_data.x_train), len(self.mnist_data.x_valid) * 5, rtol=2)
-
-

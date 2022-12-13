@@ -114,6 +114,3 @@ def _rescale_data(array: np.ndarray):
     """
     return array / 255
 
-
-if __name__ == "__main__":
-    print(load_data())
