@@ -1,4 +1,3 @@
-import load_mnist
 import numpy as np
 
 
