@@ -1,12 +1,17 @@
+from typing import Callable
+
 import numpy as np
 from load_mnist import load_data
 
 
 class ShallowNetwork:
-    def __init__(self, input_size: int, hidden_size: int, output_size: int, eta: float, epochs: int):
+    def __init__(self, input_size: int, hidden_size: int, output_size: int, eta: float, epochs: int,
+                 cost_func: Callable[[np.ndarray], np.ndarray], cost_func_prime: Callable[[np.ndarray], np.ndarray]):
         self.input_size = input_size
         self.eta = eta
         self.epochs = epochs
+        self.cost_func = cost_func
+        self.cost_func_prime = cost_func_prime
 
         # don't set weights and biases for the input
         self.h_b = np.zeros((1, hidden_size))
@@ -42,30 +47,30 @@ class ShallowNetwork:
 
         # Forward pass
         z1 = x.dot(self.h_w) + self.h_b
-        a1 = sigmoid(z1)
+        a1 = self.cost_func(z1)
         z2 = a1.dot(self.o_w) + self.o_b
-        a2 = sigmoid(z2)
+        a2 = self.cost_func(z2)
 
         # Backward pass
         m = x.shape[1]
 
         # output layer activation derivative
         dy_hat = a2 - y.reshape((-1, 1))
-        dz2 = dy_hat * sig_prime(z2)
+        dz2 = dy_hat * self.cost_func_prime(z2)
         dw2: np.ndarray = (1/m) * a1.T.dot(dz2)
         db2: np.ndarray = (1/m) * np.sum(dz2, axis=0)
 
         # hidden layer activation derivative
         da1 = dz2.dot(self.o_w.T)
-        dz1 = da1 * sig_prime(z1)
+        dz1 = da1 * self.cost_func_prime(z1)
         dw1: np.ndarray = (1/m) * x.T.dot(dz1)
         db1: np.ndarray = (1/m) * np.sum(dz1, axis=0)
 
         return dw1, dw2, db1, db2, dz2[0]
 
     def output(self, x: np.ndarray) -> np.ndarray:
-        x = sigmoid(x.dot(self.h_w) + self.h_b)
-        x = sigmoid(x.dot(self.o_w) + self.o_b)
+        x = self.cost_func(x.dot(self.h_w) + self.h_b)
+        x = self.cost_func(x.dot(self.o_w) + self.o_b)
         return x
 
     def predict(self, test_data):
@@ -76,7 +81,7 @@ def sigmoid(x: np.ndarray) -> np.ndarray:
     return 1.0 / (1.0 + np.exp(-x))
 
 
-def sig_prime(x: np.ndarray) -> np.ndarray:
+def sigmoid_prime(x: np.ndarray) -> np.ndarray:
     return sigmoid(x) * (1 - sigmoid(x))
 
 
@@ -100,7 +105,8 @@ def main():
     data = load_data(42)
 
     m = 25
-    network = ShallowNetwork(input_size=784, hidden_size=m, output_size=1, eta=0.2, epochs=1000)
+    network = ShallowNetwork(input_size=784, hidden_size=m, output_size=1, eta=0.2, epochs=1000,
+                             cost_func=sigmoid, cost_func_prime=sigmoid_prime)
     network.gradient_descent(data.x_train, data.y_train)
 
     train_accuracy = get_accuracy(network.predict(data.x_train), data.y_train.reshape(-1, 1))
