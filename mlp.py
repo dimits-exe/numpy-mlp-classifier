@@ -12,8 +12,8 @@ class ShallowNetwork:
         self.h_b = np.zeros((1, hidden_size))
         self.o_b = np.zeros((1, output_size))
 
-        self.h_w = np.random.random((input_size, hidden_size))
-        self.o_w = np.random.random((hidden_size, output_size))
+        self.h_w = np.zeros((input_size, hidden_size))
+        self.o_w = np.zeros((hidden_size, output_size))
 
     def gradient_descent(self, train_data: np.ndarray, train_labels: np.ndarray) -> None:
         hidden_weight_shape = self.h_w.shape
@@ -100,7 +100,7 @@ def main():
     data = load_data(42)
 
     m = 25
-    network = ShallowNetwork(input_size=784, hidden_size=m, output_size=1, eta=0.1, epochs=100)
+    network = ShallowNetwork(input_size=784, hidden_size=m, output_size=1, eta=0.2, epochs=1000)
     network.gradient_descent(data.x_train, data.y_train)
 
     train_accuracy = get_accuracy(network.predict(data.x_train), data.y_train.reshape(-1, 1))
@@ -113,33 +113,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-
-    """
-    bias_gradients = [np.zeros(b.shape) for b in self.biases]
-        weight_gradients = [np.zeros(w.shape) for w in self.weights]
-
-        x = x.T
-        # forward pass
-        last_activation = x
-        activations = [x]
-        z_vectors = []
-
-        for bias, weight in zip(self.biases, self.weights):
-            zh = weight.T.dot(last_activation) + bias.T
-            z_vectors.append(zh)
-            h = sigmoid(zh)
-            activations.append(h)
-            last_activation = h
-
-        # backward pass
-        # since this is a 3 layer mlp, we only need to update the output weights
-        cost = cost_derivative(activations[-1], y.reshape(1, -1))
-        delta = cost * sig_prime(z_vectors[-1])
-        z = z_vectors[-2]
-        delta = self.weights[-1].dot(delta) * sig_prime(z)
-        # TODO: figure out this mess
-        bias_gradients[-2] = delta.mean(axis=1).reshape(1, delta.shape[0])
-        # what the fuck
-        weight_gradients[-2] = activations[-3].dot(delta.T)
-
-        return bias_gradients, weight_gradients, cost[0]"""
