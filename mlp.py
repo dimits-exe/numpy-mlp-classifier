@@ -8,6 +8,7 @@ class ShallowNetwork:
     """
     A binary MLP classifier with one hidden layer.
     """
+
     def __init__(self, input_size: int, hidden_size: int, output_size: int, eta: float, epochs: int,
                  activation_func: Callable[[np.ndarray], np.ndarray],
                  activation_func_prime: Callable[[np.ndarray], np.ndarray],
@@ -52,7 +53,7 @@ class ShallowNetwork:
             dw1, dw2, db1, db2, cost = self.back_propagation(train_data, train_labels)
 
             if epoch % 50 == 0:
-                print(f"Iteration {epoch} Error: {cost}")
+                print(f"Iteration {epoch} Error: {cost[0]}")
 
             self.h_w -= self.eta * dw1
             self.o_w -= self.eta * dw2
@@ -66,7 +67,7 @@ class ShallowNetwork:
             assert self.o_b.shape == output_bias_shape
 
     def back_propagation(self, x: np.ndarray, y: np.ndarray) \
-            -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, float]:
+            -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """
         Implements the back-propagation procedure for one epoch.
         :param x: a numpy array containing the train data
@@ -87,16 +88,16 @@ class ShallowNetwork:
         # output layer activation derivative
         dy_hat = self.cost_func_prime(a2, y)
         dz2 = dy_hat * self.activation_func_prime(z2)
-        dw2: np.ndarray = (1/m) * a1.T.dot(dz2)
-        db2: np.ndarray = (1/m) * np.sum(dz2, axis=0)
+        dw2: np.ndarray = (1 / m) * a1.T.dot(dz2)
+        db2: np.ndarray = (1 / m) * np.sum(dz2, axis=0)
 
         # hidden layer activation derivative
         da1 = dz2.dot(self.o_w.T)
         dz1 = da1 * self.activation_func_prime(z1)
-        dw1: np.ndarray = (1/m) * x.T.dot(dz1)
-        db1: np.ndarray = (1/m) * np.sum(dz1, axis=0)
+        dw1: np.ndarray = (1 / m) * x.T.dot(dz1)
+        db1: np.ndarray = (1 / m) * np.sum(dz1, axis=0)
 
-        return dw1, dw2, db1, db2, dz2[0]
+        return dw1, dw2, db1, db2, dz2
 
     def output(self, x: np.ndarray) -> np.ndarray:
         """
@@ -127,10 +128,6 @@ def sigmoid_prime(x: np.ndarray) -> np.ndarray:
     return sigmoid(x) * (1 - sigmoid(x))
 
 
-def least_squares_prime(x: np.ndarray, y: np.ndarray) -> np.ndarray:
-    return x - y.reshape((-1, 1))
-
-
 def get_accuracy(predicted_labels: np.ndarray, actual_labels: np.ndarray) -> float:
     """
     Get the accuracy of the model based on its predicted and actual labels of its data.
@@ -142,14 +139,20 @@ def get_accuracy(predicted_labels: np.ndarray, actual_labels: np.ndarray) -> flo
     return true_predictions / actual_labels.shape[0]
 
 
+def binary_x_entropy_prime(y_hat: np.ndarray, y: np.ndarray) -> np.ndarray:
+    y = y.reshape(-1, 1)
+    return (1 - y) / (1 - y_hat) - y / y_hat
+
+
 def main():
     np.seterr(all="raise")
     data = load_data(42)
 
     m = 25
-    network = ShallowNetwork(input_size=784, hidden_size=m, output_size=1, eta=0.2, epochs=1000,
+    network = ShallowNetwork(input_size=784, hidden_size=m, output_size=1, eta=0.2, epochs=500,
                              activation_func=sigmoid, activation_func_prime=sigmoid_prime,
-                             cost_func_prime=least_squares_prime)
+                             cost_func_prime=binary_x_entropy_prime)
+
     network.gradient_descent(data.x_train, data.y_train)
 
     train_accuracy = get_accuracy(network.predict(data.x_train), data.y_train.reshape(-1, 1))
@@ -161,4 +164,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
