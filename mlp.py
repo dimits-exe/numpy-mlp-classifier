@@ -7,7 +7,7 @@ class ShallowNetwork:
     A binary MLP classifier with one hidden layer.
     """
 
-    def __init__(self, input_size: int, hidden_size: int, output_size: int, eta: float, epochs: int,
+    def __init__(self, input_size: int, hidden_size: int, output_size: int, eta: float, stop: int,
                  activation_func: Callable[[np.ndarray], np.ndarray],
                  activation_func_prime: Callable[[np.ndarray], np.ndarray],
                  cost_func_prime: Callable[[np.ndarray, np.ndarray], np.ndarray]):
@@ -17,14 +17,14 @@ class ShallowNetwork:
         :param hidden_size: the number of hidden neurons in the network
         :param output_size: the number of output neurons in the network
         :param eta: the learning rate
-        :param epochs: the number of epochs used during training
+        :param stop: the threshold for early stopping
         :param activation_func: the activation function
         :param activation_func_prime: the derivative of the activation function
         :param cost_func_prime: the derivative of the cost function
         """
         self.input_size = input_size
         self.eta = eta
-        self.epochs = epochs
+        self.stop = stop
         self.activation_func = activation_func
         self.activation_func_prime = activation_func_prime
         self.cost_func_prime = cost_func_prime
@@ -36,33 +36,48 @@ class ShallowNetwork:
         self.h_w = np.zeros((input_size, hidden_size))
         self.o_w = np.zeros((hidden_size, output_size))
 
-    def gradient_descent(self, train_data: np.ndarray, train_labels: np.ndarray) -> None:
+    def gradient_descent(self, train_data: np.ndarray, train_labels: np.ndarray) -> tuple[int, float]:
         """
         Implements the entire gradient descent procedure, updating the model's internal weights and biases.
         :param train_data: a numpy array containing the train data
         :param train_labels: a numpy array containing the respective labels for the training data
+        :return: the number of epochs needed to reach the early stopping point and the minimum error
         """
         hidden_weight_shape = self.h_w.shape
         output_weight_shape = self.o_w.shape
         hidden_bias_shape = self.h_b.shape
         output_bias_shape = self.o_b.shape
 
-        for epoch in range(self.epochs + 1):
-            dw1, dw2, db1, db2, cost = self.back_propagation(train_data, train_labels)
+        epoch: int = 0  # logging
+        least_error: float = np.inf
+        epochs_since_improvement: int = 0
 
-            if epoch % 50 == 0:
-                print(f"Iteration {epoch} Error: {cost[0]}")
+        while epochs_since_improvement <= self.stop:
+            dw1, dw2, db1, db2, cost = self.back_propagation(train_data, train_labels)
 
             self.h_w -= self.eta * dw1
             self.o_w -= self.eta * dw2
             self.h_b -= self.eta * db1
             self.o_b -= self.eta * db2
 
+            error = cost.mean()
+            if error < least_error:
+                least_error = error
+                epochs_since_improvement = 0
+            else:
+                epochs_since_improvement += 1
+
+            if epoch % 50 == 0:
+                print(f"Iteration {epoch} Error: {error}")
+            epoch += 1
+
             # debug
             assert self.h_w.shape == hidden_weight_shape
             assert self.o_w.shape == output_weight_shape
             assert self.h_b.shape == hidden_bias_shape
             assert self.o_b.shape == output_bias_shape
+
+        return epoch, least_error
 
     def back_propagation(self, x: np.ndarray, y: np.ndarray) \
             -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
