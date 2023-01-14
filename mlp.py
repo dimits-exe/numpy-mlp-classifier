@@ -128,39 +128,6 @@ def sigmoid_prime(x: np.ndarray) -> np.ndarray:
     return sigmoid(x) * (1 - sigmoid(x))
 
 
-def get_accuracy(predicted_labels: np.ndarray, actual_labels: np.ndarray) -> float:
-    """
-    Get the accuracy of the model based on its predicted and actual labels of its data.
-    :param predicted_labels: the labels which the model predicted
-    :param actual_labels: the actual labels of the data
-    :return: a number between 0 and 1 representing the accuracy of the model
-    """
-    true_predictions = np.count_nonzero(np.where(predicted_labels == 0, 0, 1) == actual_labels.reshape((-1, 1)))
-    return true_predictions / actual_labels.shape[0]
-
-
 def binary_x_entropy_prime(y_hat: np.ndarray, y: np.ndarray) -> np.ndarray:
     y = y.reshape(-1, 1)
     return (1 - y) / (1 - y_hat) - y / y_hat
-
-
-def main():
-    np.seterr(all="raise")
-    data = load_data(42)
-
-    m = 25
-    network = ShallowNetwork(input_size=784, hidden_size=m, output_size=1, eta=0.2, epochs=500,
-                             activation_func=sigmoid, activation_func_prime=sigmoid_prime,
-                             cost_func_prime=binary_x_entropy_prime)
-
-    network.gradient_descent(data.x_train, data.y_train)
-
-    train_accuracy = get_accuracy(network.predict(data.x_train), data.y_train.reshape(-1, 1))
-    print("Training accuracy: ", train_accuracy)
-
-    test_accuracy = get_accuracy(network.predict(data.x_test), data.y_test.reshape(-1, 1))
-    print("Testing accuracy: ", test_accuracy)
-
-
-if __name__ == "__main__":
-    main()
