@@ -48,6 +48,10 @@ def load_data(seed: int = -1) -> Data:
     y_test = _get_binary_labels(y_test)
     y_valid = _get_binary_labels(y_valid)
 
+    y_train = y_train.reshape((-1, 1))
+    y_test = y_test.reshape((-1, 1))
+    y_valid = y_valid.reshape((-1, 1))
+
     return Data(x_train, y_train, x_test, y_test, x_valid, y_valid)
 
 
@@ -113,4 +117,3 @@ def _rescale_data(array: np.ndarray):
     :return: the rescaled data
     """
     return array / 255
-

@@ -1,4 +1,5 @@
 import numpy as np
+from common import sigmoid
 
 
 class LogisticRegClassifier:
@@ -27,7 +28,7 @@ class LogisticRegClassifier:
         :param train_labels: a binary numpy array containing the labels for the training data
         :return: a list of floats containing the error for every iteration during training
         """
-        initial_weights = np.zeros(train_data.shape[1]).reshape((-1, 1))
+        initial_weights = np.zeros((train_data.shape[1], 1))
         self.weights, cost_his = LogisticRegClassifier._gradient_ascent(train_data, train_labels, initial_weights,
                                                                         self.lamda, self.alpha, self.iters,
                                                                         self.print_history)
@@ -70,7 +71,6 @@ class LogisticRegClassifier:
         regularization = (lamda / 2.0) * np.sum(theta ** 2)
 
         current_cost = (y.T.dot(np.log(h)) + (1 - y).T.dot(np.log(1 - h))) - regularization
-        y = y.reshape(y.shape[0], 1)  # prevent numpy broadcast to 2d array
 
         regularization = lamda * theta
         gradient = x.T.dot(y - h) / x.shape[0] - regularization
@@ -102,8 +102,3 @@ class LogisticRegClassifier:
                 print("Iteration ", i, " Error:", error)
 
         return theta, cost_history
-
-
-def sigmoid(x: np.ndarray) -> np.ndarray:
-    return 1.0 / (1.0 + np.exp(-x))
-

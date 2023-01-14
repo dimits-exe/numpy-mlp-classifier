@@ -27,6 +27,11 @@ class LoadTest(TestCase):
         assert self.mnist_data.x_test.shape[0] == self.mnist_data.y_test.shape[0]
         assert self.mnist_data.x_valid.shape[0] == self.mnist_data.y_valid.shape[0]
 
+    def test_label_is_array(self):
+        assert self.mnist_data.y_train.shape[1] == 1
+        assert self.mnist_data.y_test.shape[1] == 1
+        assert self.mnist_data.y_valid.shape[1] == 1
+
     def test_data_range(self):
         assert np.all((self.mnist_data.x_train >= 0) & (self.mnist_data.x_train <= 1))
         assert np.all((self.mnist_data.x_test >= 0) & (self.mnist_data.x_test <= 1))

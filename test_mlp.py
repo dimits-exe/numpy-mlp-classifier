@@ -1,9 +1,10 @@
-from typing import Callable
-from unittest import TestCase
-from mlp import ShallowNetwork
 import mlp
 from load_mnist import load_data
+from common import get_accuracy, sigmoid, sigmoid_prime, binary_x_entropy_prime
+
 import numpy as np
+from typing import Callable
+from unittest import TestCase
 
 
 class ShallowNetworkTest(TestCase):
@@ -17,9 +18,9 @@ class ShallowNetworkTest(TestCase):
 
     def setUp(self) -> None:
         m = 25
-        self.network = ShallowNetwork(input_size=784, hidden_size=m, output_size=1, eta=0.2, epochs=500,
-                                      activation_func=mlp.sigmoid, activation_func_prime=mlp.sigmoid_prime,
-                                      cost_func_prime=mlp.binary_x_entropy_prime)
+        self.network = mlp.ShallowNetwork(input_size=784, hidden_size=m, output_size=1, eta=0.2, epochs=200,
+                                          activation_func=sigmoid, activation_func_prime=sigmoid_prime,
+                                          cost_func_prime=binary_x_entropy_prime)
 
     def test_accuracy(self):
         """
@@ -27,10 +28,10 @@ class ShallowNetworkTest(TestCase):
         """
         self.network.gradient_descent(self.data.x_train, self.data.y_train)
 
-        train_accuracy = get_accuracy(self.network.predict(self.data.x_train), self.data.y_train.reshape(-1, 1))
+        train_accuracy = get_accuracy(self.network.predict(self.data.x_train), self.data.y_train)
         assert train_accuracy > 0.75
 
-        test_accuracy = get_accuracy(self.network.predict(self.data.x_test), self.data.y_test.reshape(-1, 1))
+        test_accuracy = get_accuracy(self.network.predict(self.data.x_test), self.data.y_test)
         assert test_accuracy > 0.8
 
     def test_back_prop(self):
@@ -46,7 +47,7 @@ class ShallowNetworkTest(TestCase):
         assert diff < 1  # TODO: lower this
 
 
-def wrap_back_prop(w: np.ndarray, x_sample: np.ndarray, t_sample: np.ndarray, network: ShallowNetwork) \
+def wrap_back_prop(w: np.ndarray, x_sample: np.ndarray, t_sample: np.ndarray, network: mlp.ShallowNetwork) \
         -> tuple[float, np.ndarray]:
     """
     Wrap a network instance to a function that is accepted by the provided check_gradient function.
@@ -75,7 +76,6 @@ def check_gradient(w_init: np.ndarray, x: np.ndarray, t: np.ndarray, cost_grad: 
     """
     w = np.random.rand(*w_init.shape)
     epsilon = 1e-6
-    t = t.reshape(-1, 1)
 
     _list = np.random.randint(x.shape[0], size=5)
     x_sample = np.array(x[_list, :])
@@ -101,14 +101,3 @@ def check_gradient(w_init: np.ndarray, x: np.ndarray, t: np.ndarray, cost_grad: 
             # approximate gradient ( E[ w[k,d] + theta ] - E[ w[k,d] - theta ] ) / 2*e
             numerical_grad[k, d] = (e_plus - e_minus) / (2 * epsilon)
     return grad_ew, numerical_grad
-
-
-def get_accuracy(predicted_labels: np.ndarray, actual_labels: np.ndarray) -> float:
-    """
-    Get the accuracy of the model based on its predicted and actual labels of its data.
-    :param predicted_labels: the labels which the model predicted
-    :param actual_labels: the actual labels of the data
-    :return: a number between 0 and 1 representing the accuracy of the model
-    """
-    true_predictions = np.count_nonzero(np.where(predicted_labels == 0, 0, 1) == actual_labels.reshape((-1, 1)))
-    return true_predictions / actual_labels.shape[0]

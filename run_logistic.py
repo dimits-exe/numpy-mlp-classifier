@@ -1,21 +1,10 @@
+from logistic_regression import LogisticRegClassifier
+from load_mnist import load_data
+from common import get_accuracy
+
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-from logistic_regression import LogisticRegClassifier
-from load_mnist import load_data
-
-
-def get_accuracy(predicted_labels: np.ndarray, actual_labels: np.ndarray) -> float:
-    """
-    Get the accuracy of the model based on its predicted and actual labels of its data.
-    :param predicted_labels: the labels which the model predicted
-    :param actual_labels: the actual labels of the data
-    :return: a number between 0 and 1 representing the accuracy of the model
-    """
-    true_predictions = np.count_nonzero(np.where(predicted_labels == 0, 0, 1) == actual_labels.reshape((-1, 1)))
-    return true_predictions / actual_labels.shape[0]
-
-# Train and test classifier
 
 
 iterations = 500

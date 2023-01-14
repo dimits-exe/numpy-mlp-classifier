@@ -1,7 +1,5 @@
 from typing import Callable
-
 import numpy as np
-from load_mnist import load_data
 
 
 class ShallowNetwork:
@@ -118,16 +116,3 @@ class ShallowNetwork:
         :return: a numpy array containing a binary classification for each data point
         """
         return np.where(self.output(test_data) < 0.5, 0, 1)
-
-
-def sigmoid(x: np.ndarray) -> np.ndarray:
-    return 1.0 / (1.0 + np.exp(-x))
-
-
-def sigmoid_prime(x: np.ndarray) -> np.ndarray:
-    return sigmoid(x) * (1 - sigmoid(x))
-
-
-def binary_x_entropy_prime(y_hat: np.ndarray, y: np.ndarray) -> np.ndarray:
-    y = y.reshape(-1, 1)
-    return (1 - y) / (1 - y_hat) - y / y_hat
