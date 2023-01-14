@@ -55,6 +55,45 @@
 	\caption{ Τα αποτελέσματα της αναζήτησης για το βέλτιστο \code{$\lambda$}. Οι ρόμβοι αντιπροσωπεύουν τις τιμές που εξετάσαμε. Παρατηρείστε το πλήθος των τιμών που εξετάστηκαν στην αρχή συγκριτικά με το τέλος του πεδίου αναζήτησής μας.}
 \end{figure}
 
+\section{ΜΕΡΟΣ Γ}
+
+
+\subsection{Ερώτημα Ζ}
+
+Ο τύπος της Δυαδικής Διασταυρούμενης Εντροπίας είναι:
+ \begin{equation}
+ 	\label{eq:1}
+ 	E_{b} = -(t \ln \hat{y} + (1-t) \ln(1-\hat{y}))
+ \end{equation}
+όπου $t$ το διάνυσμα των ετικετών δεδομένων και $\hat{y}$ το της εκτιμώμενης πιθανότητας.
+
+Στην παραπάνω εξίσωση παρατηρούμε ότι η τιμή $t$ είναι πάντοτε γνωστή, αντίθετα με τη $\hat{y}$, επομένως θα παραγωγίσουμε με βάση το $\hat{y}$. Εφόσον $y = f(x) + g(x) \iff y' = f'(x) + g'(x)$ ισχύει ότι:
+
+\begin{equation}
+	\label{eq:2}
+	 \frac{\partial E_b}{\partial \hat{y}} = \frac{\partial}{\partial \hat{y}} (t\ln \hat{y}) + \frac{\partial}{\partial \hat{y}} (1-t) \ln (1-\hat{y})
+\end{equation}
+
+Αναλύουμε τις επιμέρους συναρτήσεις του αθροίσματος της παραγώγου:
+
+\begin{equation}
+	\label{eq:3}
+	\frac{\partial}{\partial \hat{y}} (t \ln\hat{y}) = \frac{\partial }{\hat{y}} (t\ln\hat{y}) + \ln\hat{y} \frac{\partial}{\partial \hat{y}}t = \frac{t}{\hat{y}} + \ln \hat{y} \cdot 0 = \frac{t}{\hat{y}}
+\end{equation}
+
+\begin{equation}
+	\label{eq:4}
+	\frac{\partial}{\partial \hat{y}} ((t-1) \ln(1-\hat{y})) = (1-t)\frac{\partial}{\partial\hat{y}} (\ln(1-\hat{y})) + \ln(1-\hat{y}) \frac{\partial}{\partial \hat{y}}(1-t) = \frac{1-t}{1-\hat{y}} + \ln(1-\hat{y}) \cdot 0 =\frac{1-t}{1-\hat{y}}
+\end{equation}
+
+
+Επομένως, αθροίζοντας τις \ref{eq:3}, \ref{eq:4}, η \ref{eq:2} γίνεται:
+\begin{equation}
+	\frac{\partial E_b}{\partial \hat{y}} = - (\frac{t}{\hat{y}} - \frac{1-t}{1-\hat{y}}) = (\frac{t}{\hat{y}} + \frac{1-t}{1 - \hat{y}})
+\end{equation}
+
+Ο κώδικας επαλήθευσης του αναλυτικού τύπου βρίσκεται στο αρχείο \code{test\_mlp.py}.
+
 \printbibliography
 
 \end{document}
