@@ -36,17 +36,19 @@ class ShallowNetwork:
         self.h_w = np.zeros((input_size, hidden_size))
         self.o_w = np.zeros((hidden_size, output_size))
 
-    def gradient_descent(self, train_data: np.ndarray, train_labels: np.ndarray) -> tuple[int, float]:
+    def gradient_descent(self, train_data: np.ndarray, train_labels: np.ndarray) -> tuple[int, float, list[float]]:
         """
         Implements the entire gradient descent procedure, updating the model's internal weights and biases.
         :param train_data: a numpy array containing the train data
         :param train_labels: a numpy array containing the respective labels for the training data
-        :return: the number of epochs needed to reach the early stopping point and the minimum error
+        :return: the number of epochs needed to reach the early stopping point, the minimum error found, and the error
+        history
         """
         epoch: int = 0  # logging
         least_error: float = np.inf
         epochs_since_improvement: int = 0
         best_model_params = None
+        error_history = []
 
         while epochs_since_improvement <= self.stop:
             dw1, dw2, db1, db2, cost = self.back_propagation(train_data, train_labels)
@@ -56,6 +58,7 @@ class ShallowNetwork:
             self.h_b -= self.eta * db1
             self.o_b -= self.eta * db2
 
+            # early stopping
             error = cost.mean()
             if error < least_error:
                 least_error = error
@@ -68,13 +71,15 @@ class ShallowNetwork:
                 print(f"Iteration {epoch} Error: {error}")
             epoch += 1
 
+            error_history.append(error)
+
         # keep best model params
         self.h_w = best_model_params[0]
         self.o_w = best_model_params[1]
         self.h_b = best_model_params[2]
         self.o_b = best_model_params[3]
 
-        return epoch, least_error
+        return epoch, least_error, error_history
 
     def back_propagation(self, x: np.ndarray, y: np.ndarray) \
             -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
