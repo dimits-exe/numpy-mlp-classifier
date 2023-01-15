@@ -8,8 +8,9 @@ class ShallowNetwork:
     """
 
     def __init__(self, input_size: int, hidden_size: int, output_size: int, eta: float, patience: int,
-                 activation_func: Callable[[np.ndarray], np.ndarray],
+                 tolerance: float, activation_func: Callable[[np.ndarray], np.ndarray],
                  activation_func_prime: Callable[[np.ndarray], np.ndarray],
+                 cost_func: Callable[[np.ndarray, np.ndarray], np.ndarray],
                  cost_func_prime: Callable[[np.ndarray, np.ndarray], np.ndarray]):
         """
         Initialize the parameters of the model.
@@ -18,6 +19,8 @@ class ShallowNetwork:
         :param output_size: the number of output neurons in the network
         :param eta: the learning rate
         :param patience: the threshold for early stopping
+        :param tolerance: minimum change in the monitored quantity to qualify as an improvement,
+         i.e. an absolute change of less than the tolerance, will count as no improvement.
         :param activation_func: the activation function
         :param activation_func_prime: the derivative of the activation function
         :param cost_func_prime: the derivative of the cost function
@@ -25,8 +28,10 @@ class ShallowNetwork:
         self.input_size = input_size
         self.eta = eta
         self.patience = patience
+        self.tolerance = tolerance
         self.activation_func = activation_func
         self.activation_func_prime = activation_func_prime
+        self.cost_func = cost_func
         self.cost_func_prime = cost_func_prime
 
         # don't set weights and biases for the input
@@ -59,17 +64,17 @@ class ShallowNetwork:
             self.o_b -= self.eta * db2
 
             # early stopping
-            error = abs(cost.mean())
-            if error < least_error:
-                print(f"Iteration {epoch} improvement from {least_error} to {error}")
+            error = cost.mean()
+            if error + self.tolerance < least_error:
+                #print(f"Iteration {epoch} improvement, error {error} least error {least_error}, "
+                      #f"threshold {least_error + self.tolerance}")
                 least_error = error
                 epochs_since_improvement = 0
                 best_model_params = self.h_w, self.o_w, self.h_b, self.o_b
             else:
                 epochs_since_improvement += 1
-                print(
-                    f"Iteration {epoch} NO improvement from {least_error} to {error}, "
-                    f"increasing to{epochs_since_improvement}")
+                #print(f"Iteration {epoch} NO improvement, error {error} least error {least_error}, "
+                      #f"threshold {least_error + self.tolerance}")
 
             error_history.append(error)
             epoch += 1
@@ -102,6 +107,7 @@ class ShallowNetwork:
         m = x.shape[1]
 
         # output layer activation derivative
+        error = self.cost_func(a2, y)
         dy_hat = self.cost_func_prime(a2, y)
         dz2 = dy_hat * self.activation_func_prime(z2)
         dw2: np.ndarray = (1 / m) * a1.T.dot(dz2)
@@ -113,7 +119,7 @@ class ShallowNetwork:
         dw1: np.ndarray = (1 / m) * x.T.dot(dz1)
         db1: np.ndarray = (1 / m) * np.sum(dz1, axis=0)
 
-        return dw1, dw2, db1, db2, dz2
+        return dw1, dw2, db1, db2, error
 
     def output(self, x: np.ndarray) -> np.ndarray:
         """

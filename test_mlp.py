@@ -1,6 +1,6 @@
 import mlp
 from load_mnist import load_data
-from common import get_accuracy, sigmoid, sigmoid_prime, binary_x_entropy_prime
+from common import get_accuracy, sigmoid, sigmoid_prime, binary_x_entropy
 
 import numpy as np
 from typing import Callable
@@ -19,8 +19,8 @@ class ShallowNetworkTest(TestCase):
     def setUp(self) -> None:
         m = 25
         self.network = mlp.ShallowNetwork(input_size=784, hidden_size=m, output_size=1, eta=0.2, patience=5,
-                                          activation_func=sigmoid, activation_func_prime=sigmoid_prime,
-                                          cost_func_prime=binary_x_entropy_prime)
+                                          tolerance=1e-6, activation_func=sigmoid, activation_func_prime=sigmoid_prime,
+                                          cost_func_prime=binary_x_entropy)
 
     def test_accuracy(self):
         """
@@ -46,6 +46,9 @@ class ShallowNetworkTest(TestCase):
         diff = np.max(np.abs(grad_ew - numerical_grad))
         assert diff < 1  # TODO: lower this
 
+
+def binary_x_entropy_prime(y_hat: np.ndarray, y: np.ndarray) -> np.ndarray:
+    return (1 - y) / (1 - y_hat) - y / y_hat
 
 def wrap_back_prop(w: np.ndarray, x_sample: np.ndarray, t_sample: np.ndarray, network: mlp.ShallowNetwork) \
         -> tuple[float, np.ndarray]:

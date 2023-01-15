@@ -20,5 +20,9 @@ def sigmoid_prime(x: np.ndarray) -> np.ndarray:
     return sigmoid(x) * (1 - sigmoid(x))
 
 
-def binary_x_entropy_prime(y_hat: np.ndarray, y: np.ndarray) -> np.ndarray:
+def binary_x_entropy(y_hat: np.ndarray, y: np.ndarray) -> np.ndarray:
+    return -(y * np.log(y_hat) + (1-y) * np.log(1-y_hat))
+
+
+def binary_x_entropy_prime(y_hat, y):
     return (1 - y) / (1 - y_hat) - y / y_hat
