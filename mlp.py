@@ -7,7 +7,7 @@ class ShallowNetwork:
     A binary MLP classifier with one hidden layer.
     """
 
-    def __init__(self, input_size: int, hidden_size: int, output_size: int, eta: float, stop: int,
+    def __init__(self, input_size: int, hidden_size: int, output_size: int, eta: float, patience: int,
                  activation_func: Callable[[np.ndarray], np.ndarray],
                  activation_func_prime: Callable[[np.ndarray], np.ndarray],
                  cost_func_prime: Callable[[np.ndarray, np.ndarray], np.ndarray]):
@@ -17,14 +17,14 @@ class ShallowNetwork:
         :param hidden_size: the number of hidden neurons in the network
         :param output_size: the number of output neurons in the network
         :param eta: the learning rate
-        :param stop: the threshold for early stopping
+        :param patience: the threshold for early stopping
         :param activation_func: the activation function
         :param activation_func_prime: the derivative of the activation function
         :param cost_func_prime: the derivative of the cost function
         """
         self.input_size = input_size
         self.eta = eta
-        self.stop = stop
+        self.patience = patience
         self.activation_func = activation_func
         self.activation_func_prime = activation_func_prime
         self.cost_func_prime = cost_func_prime
@@ -50,7 +50,7 @@ class ShallowNetwork:
         best_model_params = None
         error_history = []
 
-        while epochs_since_improvement <= self.stop:
+        while epochs_since_improvement <= self.patience:
             dw1, dw2, db1, db2, cost = self.back_propagation(train_data, train_labels)
 
             self.h_w -= self.eta * dw1
@@ -59,19 +59,20 @@ class ShallowNetwork:
             self.o_b -= self.eta * db2
 
             # early stopping
-            error = cost.mean()
+            error = abs(cost.mean())
             if error < least_error:
+                print(f"Iteration {epoch} improvement from {least_error} to {error}")
                 least_error = error
                 epochs_since_improvement = 0
                 best_model_params = self.h_w, self.o_w, self.h_b, self.o_b
             else:
                 epochs_since_improvement += 1
-
-            if epoch % 50 == 0:
-                print(f"Iteration {epoch} Error: {error}")
-            epoch += 1
+                print(
+                    f"Iteration {epoch} NO improvement from {least_error} to {error}, "
+                    f"increasing to{epochs_since_improvement}")
 
             error_history.append(error)
+            epoch += 1
 
         # keep best model params
         self.h_w = best_model_params[0]

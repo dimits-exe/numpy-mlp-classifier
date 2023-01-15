@@ -18,7 +18,7 @@ class ShallowNetworkTest(TestCase):
 
     def setUp(self) -> None:
         m = 25
-        self.network = mlp.ShallowNetwork(input_size=784, hidden_size=m, output_size=1, eta=0.2, stop=5,
+        self.network = mlp.ShallowNetwork(input_size=784, hidden_size=m, output_size=1, eta=0.2, patience=5,
                                           activation_func=sigmoid, activation_func_prime=sigmoid_prime,
                                           cost_func_prime=binary_x_entropy_prime)
 
