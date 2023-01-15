@@ -51,6 +51,7 @@ class ShallowNetwork:
         epoch: int = 0  # logging
         least_error: float = np.inf
         epochs_since_improvement: int = 0
+        best_model_params = None
 
         while epochs_since_improvement <= self.stop:
             dw1, dw2, db1, db2, cost = self.back_propagation(train_data, train_labels)
@@ -61,11 +62,15 @@ class ShallowNetwork:
             self.o_b -= self.eta * db2
 
             error = cost.mean()
+            # print(f"Iteration {epoch} Error: {error}")
             if error < least_error:
+                # print(f"New least error, from {least_error} to {error}")
                 least_error = error
                 epochs_since_improvement = 0
+                best_model_params = self.h_w, self.o_w, self.h_b, self.o_b
             else:
                 epochs_since_improvement += 1
+                # (f"No improvement, increasing to {epochs_since_improvement}")
 
             if epoch % 50 == 0:
                 print(f"Iteration {epoch} Error: {error}")
@@ -76,6 +81,12 @@ class ShallowNetwork:
             assert self.o_w.shape == output_weight_shape
             assert self.h_b.shape == hidden_bias_shape
             assert self.o_b.shape == output_bias_shape
+
+        # keep best model params
+        self.h_w = best_model_params[0]
+        self.o_w = best_model_params[1]
+        self.h_b = best_model_params[2]
+        self.o_b = best_model_params[3]
 
         return epoch, least_error
 
