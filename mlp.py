@@ -43,11 +43,6 @@ class ShallowNetwork:
         :param train_labels: a numpy array containing the respective labels for the training data
         :return: the number of epochs needed to reach the early stopping point and the minimum error
         """
-        hidden_weight_shape = self.h_w.shape
-        output_weight_shape = self.o_w.shape
-        hidden_bias_shape = self.h_b.shape
-        output_bias_shape = self.o_b.shape
-
         epoch: int = 0  # logging
         least_error: float = np.inf
         epochs_since_improvement: int = 0
@@ -62,25 +57,16 @@ class ShallowNetwork:
             self.o_b -= self.eta * db2
 
             error = cost.mean()
-            # print(f"Iteration {epoch} Error: {error}")
             if error < least_error:
-                # print(f"New least error, from {least_error} to {error}")
                 least_error = error
                 epochs_since_improvement = 0
                 best_model_params = self.h_w, self.o_w, self.h_b, self.o_b
             else:
                 epochs_since_improvement += 1
-                # (f"No improvement, increasing to {epochs_since_improvement}")
 
             if epoch % 50 == 0:
                 print(f"Iteration {epoch} Error: {error}")
             epoch += 1
-
-            # debug
-            assert self.h_w.shape == hidden_weight_shape
-            assert self.o_w.shape == output_weight_shape
-            assert self.h_b.shape == hidden_bias_shape
-            assert self.o_b.shape == output_bias_shape
 
         # keep best model params
         self.h_w = best_model_params[0]
