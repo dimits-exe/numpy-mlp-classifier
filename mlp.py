@@ -99,13 +99,10 @@ class ShallowNetwork:
             # early stopping
             error = cost.mean()
             if error + self.tolerance < least_error:
-                print(f"Iteration {epoch} improvement from {least_error} to {error}")
                 least_error = error
                 epochs_since_improvement = 0
                 best_model_params = parameters
             else:
-                print(f"Iteration {epoch} NO improvement from {least_error} to {error}, "
-                    f"increasing to {epochs_since_improvement}")
                 epochs_since_improvement += 1
 
             error_history.append(error)
