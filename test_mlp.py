@@ -1,6 +1,6 @@
 import mlp
 from load_mnist import load_data
-from common import get_accuracy, sigmoid, sigmoid_prime, binary_x_entropy
+from common import get_accuracy, sigmoid, sigmoid_prime, binary_x_entropy, binary_x_entropy_prime
 
 import numpy as np
 from typing import Callable
@@ -20,13 +20,15 @@ class ShallowNetworkTest(TestCase):
         m = 25
         self.network = mlp.ShallowNetwork(input_size=784, hidden_size=m, output_size=1, eta=0.2, patience=5,
                                           tolerance=1e-6, activation_func=sigmoid, activation_func_prime=sigmoid_prime,
-                                          cost_func_prime=binary_x_entropy)
+                                          cost_func=binary_x_entropy, cost_func_prime=binary_x_entropy_prime)
 
     def test_accuracy(self):
         """
         Check whether the model successfully classifies examples over an arbitrary threshold.
         """
-        self.network.gradient_descent(self.data.x_train, self.data.y_train)
+        self.network.train(self.data.x_train, self.data.y_train)
+
+        #print(self.network.test(self.data.x_test, self.data.y_test))
 
         train_accuracy = get_accuracy(self.network.predict(self.data.x_train), self.data.y_train)
         assert train_accuracy > 0.7
@@ -47,9 +49,6 @@ class ShallowNetworkTest(TestCase):
         assert diff < 1  # TODO: lower this
 
 
-def binary_x_entropy_prime(y_hat: np.ndarray, y: np.ndarray) -> np.ndarray:
-    return (1 - y) / (1 - y_hat) - y / y_hat
-
 def wrap_back_prop(w: np.ndarray, x_sample: np.ndarray, t_sample: np.ndarray, network: mlp.ShallowNetwork) \
         -> tuple[float, np.ndarray]:
     """
@@ -61,7 +60,7 @@ def wrap_back_prop(w: np.ndarray, x_sample: np.ndarray, t_sample: np.ndarray, ne
     :return: a numpy array containing the error and another containing the gradient
     """
     network.h_w = w
-    results = network.back_propagation(x_sample, t_sample)
+    results = network._back_propagation(x_sample, t_sample)
     grad = results[0]
     error = results[4][0][0]  # get the first element of the error array as a float
     return error, network.h_w - network.eta * grad
