@@ -34,16 +34,17 @@ class LogisticRegClassifier:
                                                                         self.print_history)
         return cost_his
 
-    def test(self, test_data, test_labels) -> list[float]:
+    def test(self, test_data, test_labels) -> np.ndarray:
         """
         Test the model without modifying its internal weights.
         :param test_data: a numpy array containing the training data
         :param test_labels: a binary numpy array containing the labels for the training data
-        :return:  a list of floats containing the error for every iteration during testing
+        :return: a numpy array containing the error for every iteration during testing
         """
-        return LogisticRegClassifier._gradient_ascent(test_data, test_labels, self.weights,
-                                                      self.lamda, self.alpha, self.iters,
-                                                      self.print_history)[1]
+        error_history = LogisticRegClassifier._gradient_ascent(test_data, test_labels, self.weights,
+                                                               self.lamda, self.alpha, self.iters,
+                                                               self.print_history)[1]
+        return np.asarray(error_history)
 
     def predict(self, data: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         """
@@ -58,7 +59,7 @@ class LogisticRegClassifier:
 
     @classmethod
     def _cost_gradient(cls, x: np.ndarray, y: np.ndarray, theta: np.ndarray, lamda: float) \
-            -> tuple[np.ndarray, np.ndarray]:
+            -> tuple[float, np.ndarray]:
         """
         Compute the cost gradient
         :param x: a numpy array containing the data
@@ -71,7 +72,7 @@ class LogisticRegClassifier:
         regularization = (lamda / 2.0) * np.sum(theta ** 2)
 
         current_cost = (y.T.dot(np.log(h)) + (1 - y).T.dot(np.log(1 - h))) - regularization
-
+        current_cost = current_cost[0][0]  # turn 2D array into scalar
         regularization = lamda * theta
         gradient = x.T.dot(y - h) / x.shape[0] - regularization
         return current_cost, gradient
@@ -88,14 +89,14 @@ class LogisticRegClassifier:
         :param alpha: the learning rate
         :param iters: the number of iterations to run through
         :param print_results: whether to periodically print the cost while running
-        :return:
+        :return: the updated weights and cost history
         """
         cost_history = []
 
         for i in range(iters + 1):
             error, gradient = LogisticRegClassifier._cost_gradient(x, y, theta, lamda)
 
-            cost_history.append(error[0])
+            cost_history.append(error)
             theta += alpha * gradient  # addition because we are ascending
 
             if print_results and i % 100 == 0:
