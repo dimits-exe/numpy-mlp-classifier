@@ -57,7 +57,7 @@ for i, lamda in enumerate(lamda_values):
     classifier.train(data.x_train, data.y_train)
     val_loss[i] = classifier.test(data.x_valid, data.y_valid).mean()
 
-best_index = val_loss.argmin()
+best_index = val_loss.argmax()  # find the largest loss since it's negative due to gradient descent
 best_lambda = lamda_values[best_index]
 print(f"Best lambda value {best_lambda} with validation accuracy={val_loss[best_index]}")
 
