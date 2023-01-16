@@ -2,11 +2,12 @@ from logistic_regression import LogisticRegClassifier
 from load_mnist import load_data
 from common import get_accuracy
 
+import time
 import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-
+start_time = time.process_time()
 iterations = 500
 learning_rate = 0.2
 
@@ -44,25 +45,23 @@ print("Train/Test error figure saved successfully")
 
 # Search for optimal lambda parameter
 
-accuracy = np.zeros(100)
+val_loss = np.zeros(100)
 lamda_values = np.logspace(start=-4, stop=1, num=100)
 
 print("Starting parameter search for optimal lambda")
 for i, lamda in enumerate(lamda_values):
     if i % 10 == 0:
-        print(i, "% complete...")
+        print(str(i) + "% complete...")
 
     classifier = LogisticRegClassifier(iters=iterations, alpha=learning_rate, lamda=lamda, print_history=False)
     classifier.train(data.x_train, data.y_train)
-    predicted, _ = classifier.predict(data.x_valid)
-    accuracy[i] = get_accuracy(predicted, data.y_valid)
+    val_loss[i] = classifier.test(data.x_valid, data.y_valid).mean()
 
-best_index = accuracy.argmax()
+best_index = val_loss.argmin()
 best_lambda = lamda_values[best_index]
-print(f"Best lambda value {best_lambda} with validation accuracy={accuracy[best_index]}")
+print(f"Best lambda value {best_lambda} with validation accuracy={val_loss[best_index]}")
 
 # Test on optimal lambda
-
 classifier = LogisticRegClassifier(iters=iterations, alpha=learning_rate, lamda=best_lambda, print_history=False)
 classifier.train(data.x_train, data.y_train)
 predicted, _ = classifier.predict(data.x_test)
@@ -70,12 +69,14 @@ best_lambda_test_acc = get_accuracy(predicted, data.y_test)
 print(f"Test accuracy for optimal lambda={best_lambda}: {best_lambda_test_acc}")
 
 # Save lambda plot
-
 plt.figure()
-plt.title("Logistic Regression Classifier Test Accuracy")
-plt.plot(lamda_values, accuracy * 100, color="red", marker="D")
+plt.title("Logistic Regression Classifier Validation Loss")
+plt.plot(lamda_values, val_loss, color="red", marker="D")
 plt.xlabel("Lambda value")
-plt.ylabel("Validation test accuracy (%)")
+plt.ylabel("Validation Loss")
 
 plt.savefig(os.path.join("images", "logistic_lambda_accuracy.png"))
-print("Lambda-accuracy plot saved successfully")
+print("Lambda-loss plot saved successfully")
+
+end_time = time.process_time()
+print(f"Tasks finished after {end_time - start_time} seconds")
