@@ -8,13 +8,17 @@ import matplotlib.pyplot as plt
 import os
 
 start_time = time.process_time()
-iterations = 500
-learning_rate = 0.2
+ITERATIONS = 250
+LEARNING_RATE = 0.2
 
+print("Loading data...")
 data = load_data()
-classifier = LogisticRegClassifier(iters=iterations, alpha=learning_rate, lamda=0, print_history=True)
+
+print("Training classifier for the train-loss figure...")
+classifier = LogisticRegClassifier(iters=ITERATIONS*2, alpha=LEARNING_RATE, lamda=0, print_history=True)
 
 train_cost_history = classifier.train(data.x_train, data.y_train)
+print("Testing trained classifier for the test-loss figure...")
 test_cost_history = classifier.test(data.x_test, data.y_test)
 
 # training results
@@ -26,7 +30,7 @@ labels, _ = classifier.predict(data.x_test)
 print("Testing accuracy: ", round(get_accuracy(labels, data.y_test), 3))
 
 # Save train/test accuracy plot
-
+print("Producing train/test loss figure")
 fig, (ax1, ax2) = plt.subplots(1, 2, layout="constrained")
 fig.suptitle("Logistic Regression Classifier Error")
 
@@ -40,29 +44,34 @@ ax2.set_ylabel("Cost")
 ax2.set_xlabel("Number of iterations")
 ax2.set_title("Testing")
 
-plt.savefig(os.path.join("images", "logistic_error.png"))
-print("Train/Test error figure saved successfully")
+path = os.path.join("images", "mlp_error.png")
+plt.savefig(path)
+print("Train/Test loss plot saved in ", path)
 
 # Search for optimal lambda parameter
-
-val_loss = np.zeros(100)
-lamda_values = np.logspace(start=-4, stop=1, num=100)
+lamda_search_count = 100
+val_loss = np.full(lamda_search_count, fill_value=-np.inf)
+lamda_values = np.logspace(start=-4, stop=1, num=lamda_search_count)
 
 print("Starting parameter search for optimal lambda")
-for i, lamda in enumerate(lamda_values):
+for i in range(lamda_search_count):
     if i % 10 == 0:
         print(str(i) + "% complete...")
 
-    classifier = LogisticRegClassifier(iters=iterations, alpha=learning_rate, lamda=lamda, print_history=False)
+    classifier = LogisticRegClassifier(iters=ITERATIONS, alpha=LEARNING_RATE, lamda=lamda_values[i], print_history=False)
     classifier.train(data.x_train, data.y_train)
+
     val_loss[i] = classifier.test(data.x_valid, data.y_valid).mean()
 
-best_index = val_loss.argmax()  # find the largest loss since it's negative due to gradient descent
+    predicted, _ = classifier.predict(data.x_valid)
+    accuracy = get_accuracy(predicted, data.y_valid)
+
+best_index = np.nanargmax(val_loss)  # find the largest loss, since it's negative due to gradient descent
 best_lambda = lamda_values[best_index]
 print(f"Best lambda value {best_lambda} with validation accuracy={val_loss[best_index]}")
 
 # Test on optimal lambda
-classifier = LogisticRegClassifier(iters=iterations, alpha=learning_rate, lamda=best_lambda, print_history=False)
+classifier = LogisticRegClassifier(iters=ITERATIONS, alpha=LEARNING_RATE, lamda=best_lambda, print_history=False)
 classifier.train(data.x_train, data.y_train)
 predicted, _ = classifier.predict(data.x_test)
 best_lambda_test_acc = get_accuracy(predicted, data.y_test)
