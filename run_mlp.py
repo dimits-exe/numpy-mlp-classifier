@@ -25,9 +25,12 @@ epochs, last_error, train_cost_history = classifier.train(data.x_train, data.y_t
 
 # Training results
 labels = classifier.predict(data.x_train)
+print("Train error: ", last_error)
 print("Training accuracy: ", round(get_accuracy(labels, data.y_train), 3))
 
 # Testing results
+test_error = classifier.test(data.x_test, data.y_test)
+print("Test error: ", test_error)
 labels = classifier.predict(data.x_test)
 print("Testing accuracy: ", round(get_accuracy(labels, data.y_test), 3))
 
@@ -51,8 +54,6 @@ epochs_needed = np.zeros((eta_search_count, m_search_count)).astype(int)
 eta_values = np.logspace(start=0, stop=-5, num=eta_search_count, base=10) / 2
 m_values = np.logspace(start=1, stop=10, num=m_search_count, base=2).astype(int)
 
-print(eta_values)
-
 print("Starting parameter search for optimal eta and M values.")
 for i in range(m_search_count):
     print(str(i * 10) + "% complete...")
@@ -67,10 +68,6 @@ for i in range(m_search_count):
         epochs, _, _ = classifier.train(data.x_train, data.y_train)
         epochs_needed[i][j] = epochs
         val_loss[i][j] = classifier.test(data.x_valid, data.y_valid)
-
-        labels = classifier.predict(data.x_valid)
-        accuracy = get_accuracy(labels, data.y_valid)
-        print(f"Epochs: {epochs} | Accuracy: {accuracy} | Loss: {val_loss[i][j]} | M: {m} | Eta: {eta}")
 
 best_index = np.unravel_index(val_loss.argmin(), val_loss.shape)
 best_m = m_values[best_index[0]]
@@ -88,7 +85,9 @@ classifier = ShallowNetwork(input_size=INPUT_SIZE, hidden_size=best_m, output_si
                             cost_func_prime=binary_x_entropy_prime)
 
 classifier.train(data.x_train, data.y_train)
+optimal_test_error = classifier.test(data.x_test, data.y_test)
 labels = classifier.predict(data.x_test)
+print("Test loss for optimal hyper-parameters: ", optimal_test_error)
 print("Test accuracy for optimal hyper-parameters: ", round(get_accuracy(labels, data.y_test), 3))
 
 

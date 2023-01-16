@@ -28,7 +28,7 @@ class ShallowNetworkTest(TestCase):
         """
         self.network.train(self.data.x_train, self.data.y_train)
 
-        #print(self.network.test(self.data.x_test, self.data.y_test))
+        print(self.network.test(self.data.x_test, self.data.y_test))
 
         train_accuracy = get_accuracy(self.network.predict(self.data.x_train), self.data.y_train)
         assert train_accuracy > 0.7
