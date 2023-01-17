@@ -110,14 +110,13 @@ class ShallowNetwork:
 
         return best_model_params, epoch, least_error, error_history
 
-    def _back_propagation(self, x: np.ndarray, y: np.ndarray, parameters: dict[str, np.ndarray], mul=1) \
+    def _back_propagation(self, x: np.ndarray, y: np.ndarray, parameters: dict[str, np.ndarray]) \
             -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """
         Implements the back-propagation procedure for one epoch.
         :param parameters: a dictionary containing the last computed weights and biases
         :param x: a numpy array containing the train data
         :param y: a numpy array containing the respective labels for the training data
-        :param mul: a regularization parameter to keep gradient growth consistent
         :return: a tuple containing the gradients for the hidden weights, output weights, hidden bias, output bias and
         the current error respectively
         """
@@ -140,14 +139,14 @@ class ShallowNetwork:
         dy_hat = self.cost_func_prime(a2, y)
         dz2 = dy_hat * self.activation_func_prime(z2)
         # something is wrong in the line below, and it fucks the computation under specific circumstances
-        dw2: np.ndarray = (mul / m) * a1.T.dot(dz2)
-        db2: np.ndarray = (mul / m) * np.sum(dz2, axis=0)
+        dw2: np.ndarray = (1 / m) * a1.T.dot(dz2)
+        db2: np.ndarray = (1 / m) * np.sum(dz2, axis=0)
 
         # hidden layer activation derivative
         da1 = dz2.dot(o_w.T)
         dz1 = da1 * self.activation_func_prime(z1)
-        dw1: np.ndarray = (mul / m) * x.T.dot(dz1)
-        db1: np.ndarray = (mul / m) * np.sum(dz1, axis=0)
+        dw1: np.ndarray = (1 / m) * x.T.dot(dz1)
+        db1: np.ndarray = (1 / m) * np.sum(dz1, axis=0)
 
         return dw1, dw2, db1, db2, error
 

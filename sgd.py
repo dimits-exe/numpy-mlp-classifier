@@ -37,27 +37,27 @@ class StochasticNetwork(mlp.ShallowNetwork):
             shuffled_data, shuffled_labels = unison_shuffled_copies(train_data_copy, train_labels_copy)
             batch_data = shuffled_data[:self.batch_size]
             batch_labels = shuffled_labels[:self.batch_size]
-            mul = train_data.shape[0] / self.batch_size  # gradient regularization
+            reg = train_data.shape[0] / self.batch_size  # gradient regularization
 
             parameters = {"h_w": h_w, "o_w": o_w, "h_b": h_b, "o_b": o_b}
-            dw1, dw2, db1, db2, cost = self._back_propagation(batch_data, batch_labels, parameters, mul)
+            dw1, dw2, db1, db2, cost = self._back_propagation(batch_data, batch_labels, parameters)
 
-            h_w -= self.eta * dw1
-            o_w -= self.eta * dw2
-            h_b -= self.eta * db1
-            o_b -= self.eta * db2
+            h_w -= self.eta * reg * dw1
+            o_w -= self.eta * reg * dw2
+            h_b -= self.eta * reg * db1
+            o_b -= self.eta * reg * db2
 
             # early stopping
             error = cost.mean()
             if error + self.tolerance < least_error:
-                print(f"Iteration {epoch} improvement from {least_error} to {error}")
+                #print(f"Iteration {epoch} improvement from {least_error} to {error}")
                 least_error = error
                 epochs_since_improvement = 0
                 best_model_params = parameters
             else:
                 epochs_since_improvement += 1
-                print(f"Iteration {epoch} NO improvement from {least_error} to {error}, "
-                      f"increasing to {epochs_since_improvement}")
+                #print(f"Iteration {epoch} NO improvement from {least_error} to {error}, "
+                      #f"increasing to {epochs_since_improvement}")
 
             error_history.append(error)
             epoch += 1
