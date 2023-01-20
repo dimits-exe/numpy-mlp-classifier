@@ -21,18 +21,17 @@ classifier = ShallowNetwork(input_size=INPUT_SIZE, hidden_size=25, output_size=O
                             patience=PATIENCE, tolerance=TOLERANCE,
                             activation_func=sigmoid, activation_func_prime=sigmoid_prime, cost_func=binary_x_entropy,
                             cost_func_prime=binary_x_entropy_prime)
-epochs, last_error, train_cost_history = classifier.train(data.x_train, data.y_train)
+epochs, val_error, train_cost_history = classifier.train(data.x_train, data.y_train, data.x_valid, data.y_valid)
 
 # Training results
-labels = classifier.predict(data.x_train)
-print("Train error: ", last_error)
-print("Training accuracy: ", round(get_accuracy(labels, data.y_train), 3))
+print("Mean validation loss: ", val_error)
+train_labels, _ = classifier.predict(data.x_train)
+print("Training accuracy: ", round(get_accuracy(train_labels, data.y_train), 3))
 
 # Testing results
-test_error = classifier.test(data.x_test, data.y_test)
-print("Test error: ", test_error)
-labels = classifier.predict(data.x_test)
-print("Testing accuracy: ", round(get_accuracy(labels, data.y_test), 3))
+test_labels, test_error = classifier.predict(data.x_test, data.y_test)
+print("Mean testing loss: ", test_error)
+print("Testing accuracy: ", round(get_accuracy(test_labels, data.y_test), 3))
 
 # Train error plot
 print("Creating train loss plot...")
@@ -65,9 +64,9 @@ for i in range(m_search_count):
                                     patience=PATIENCE, tolerance=TOLERANCE, activation_func=sigmoid,
                                     activation_func_prime=sigmoid_prime, cost_func=binary_x_entropy,
                                     cost_func_prime=binary_x_entropy_prime)
-        epochs, _, _ = classifier.train(data.x_train, data.y_train)
+        epochs, _, _ = classifier.train(data.x_train, data.y_train, data.x_valid, data.y_valid)
         epochs_needed[i][j] = epochs
-        val_loss[i][j] = classifier.test(data.x_valid, data.y_valid)
+        val_loss[i][j] = classifier.predict(data.x_valid)[1]
 
 best_index = np.unravel_index(val_loss.argmin(), val_loss.shape)
 best_m = m_values[best_index[0]]
@@ -84,11 +83,10 @@ classifier = ShallowNetwork(input_size=INPUT_SIZE, hidden_size=best_m, output_si
                             activation_func_prime=sigmoid_prime, cost_func=binary_x_entropy,
                             cost_func_prime=binary_x_entropy_prime)
 
-classifier.train(data.x_train, data.y_train)
-optimal_test_error = classifier.test(data.x_test, data.y_test)
-labels = classifier.predict(data.x_test)
+classifier.train(data.x_train, data.y_train, data.x_valid, data.y_valid)
+optimal_test_labels, optimal_test_error = classifier.predict(data.x_test, data.y_test)
 print("Test loss for optimal hyper-parameters: ", optimal_test_error)
-print("Test accuracy for optimal hyper-parameters: ", round(get_accuracy(labels, data.y_test), 3))
+print("Test accuracy for optimal hyper-parameters: ", round(get_accuracy(optimal_test_labels, data.y_test), 3))
 
 
 end_time = time.process_time()
