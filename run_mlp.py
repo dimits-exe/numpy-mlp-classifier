@@ -68,7 +68,7 @@ for i in range(m_search_count):
         epochs_needed[i][j] = epochs
         val_loss[i][j] = classifier.predict(data.x_valid)[1]
 
-best_index = np.unravel_index(val_loss.argmin(), val_loss.shape)
+best_index = np.unravel_index(np.nanargmin(val_loss), val_loss.shape)
 best_m = m_values[best_index[0]]
 best_eta = eta_values[best_index[1]]
 

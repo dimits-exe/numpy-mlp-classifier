@@ -15,6 +15,7 @@ HIDDEN_SIZE = 25
 LEARNING_RATE = 0.2
 
 start_time = time.process_time()
+np.seterr(all="ignore")  # not debug
 print("Loading data...")
 data = load_data(456)
 
@@ -22,7 +23,7 @@ print("Training classifier for train loss figure...")
 classifier = StochasticNetwork(input_size=INPUT_SIZE, hidden_size=HIDDEN_SIZE, output_size=OUTPUT_SIZE,
                                eta=LEARNING_RATE, patience=PATIENCE, tolerance=TOLERANCE,
                                activation_func=sigmoid, activation_func_prime=sigmoid_prime, cost_func=binary_x_entropy,
-                               cost_func_prime=binary_x_entropy_prime, b=128)
+                               cost_func_prime=binary_x_entropy_prime, b=256)
 epochs, val_loss, train_cost_history = classifier.train(data.x_train, data.y_train, data.x_valid, data.y_valid)
 
 # Training results
@@ -57,15 +58,13 @@ for i in range(b_search_count):
     b = b_values[i]
 
     classifier = StochasticNetwork(input_size=INPUT_SIZE, hidden_size=HIDDEN_SIZE, output_size=OUTPUT_SIZE,
-                                   eta=LEARNING_RATE, patience=PATIENCE, tolerance=TOLERANCE,
+                                   eta=0.3, patience=PATIENCE, tolerance=TOLERANCE,
                                    activation_func=sigmoid, activation_func_prime=sigmoid_prime,
                                    cost_func=binary_x_entropy,
                                    cost_func_prime=binary_x_entropy_prime, b=b)
     epochs, _, _ = classifier.train(data.x_train, data.y_train, data.x_valid, data.y_valid)
     epochs_needed[i] = epochs
     labels, val_loss[i] = classifier.predict(data.x_valid, data.y_valid)
-    accuracy = get_accuracy(labels, data.y_valid)
-    print(f"B: {b} | Loss: {val_loss[i]} | Accuracy: {accuracy} | Epochs: {epochs}")
 
 best_index = np.unravel_index(val_loss.argmin(), val_loss.shape)
 best_b = b_values[best_index[0]]
@@ -74,10 +73,11 @@ print(f"Best hyper-parameter b={best_b},"
       f"trained on {epochs_needed[best_index]} epochs and "
       f"with validation loss={val_loss[best_index]}")
 
+
 # Test optimal network
 print("Training classifier with optimal hyper-parameters...")
 classifier = StochasticNetwork(input_size=INPUT_SIZE, hidden_size=HIDDEN_SIZE, output_size=OUTPUT_SIZE,
-                               eta=LEARNING_RATE, patience=PATIENCE, tolerance=TOLERANCE, activation_func=sigmoid,
+                               eta=0.3, patience=PATIENCE, tolerance=TOLERANCE, activation_func=sigmoid,
                                activation_func_prime=sigmoid_prime, cost_func=binary_x_entropy,
                                cost_func_prime=binary_x_entropy_prime, b=best_b)
 
@@ -87,6 +87,7 @@ print("Test loss for optimal hyper-parameters: ", optimal_test_loss)
 print("Test accuracy for optimal hyper-parameters: ", round(get_accuracy(optimal_test_labels, data.y_test), 3))
 
 # Parameter search for optimal eta and m values
+# Same code as run_mlp.py
 eta_search_count = 10
 m_search_count = 10
 val_loss = np.zeros((eta_search_count, m_search_count))
@@ -104,7 +105,7 @@ for i in range(m_search_count):
         classifier = StochasticNetwork(input_size=INPUT_SIZE, hidden_size=m, output_size=OUTPUT_SIZE, eta=eta,
                                        patience=PATIENCE, tolerance=TOLERANCE, activation_func=sigmoid,
                                        activation_func_prime=sigmoid_prime, cost_func=binary_x_entropy,
-                                       cost_func_prime=binary_x_entropy_prime, b=256)
+                                       cost_func_prime=binary_x_entropy_prime, b=best_b)
         epochs, _, _ = classifier.train(data.x_train, data.y_train, data.x_valid, data.y_valid)
         epochs_needed[i][j] = epochs
         val_loss[i][j] = classifier.predict(data.x_valid, data.y_valid)[1]
