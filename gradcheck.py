@@ -85,7 +85,7 @@ def test_grad():
     h_w_init = np.zeros((784, 25))
     o_w_init = np.zeros((25, 1))
 
-    network = mlp.ShallowNetwork(input_size=784, hidden_size=25, output_size=1, eta=0.2, patience=5,
+    network = mlp.ShallowNetwork(input_size=784, hidden_size=25, output_size=1, eta=0.3, patience=5,
                                  tolerance=1e-3, activation_func=sigmoid, activation_func_prime=sigmoid_prime,
                                  cost_func=binary_x_entropy, cost_func_prime=binary_x_entropy_prime)
     network.train(data.x_train, data.y_train, data.x_valid, data.y_valid)
