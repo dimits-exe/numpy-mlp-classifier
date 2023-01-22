@@ -36,11 +36,12 @@ class StochasticNetwork(mlp.ShallowNetwork):
         o_b = self.o_b.copy()
 
         while epochs_since_improvement <= self.patience:
-            # create batches
-            shuffled_data, shuffled_labels = unison_shuffled_copies(train_data_copy, train_labels_copy)
+            # Randomly shuffle the (copy of the) provided data points and labels before
+            # selecting a B-sized subset and feeding it into the back propagation method
+            shuffled_data, shuffled_labels = _reshuffle_data(train_data_copy, train_labels_copy)
             batch_data = shuffled_data[:self.batch_size]
             batch_labels = shuffled_labels[:self.batch_size]
-            reg = train_data.shape[0] / self.batch_size  # gradient regularization
+            reg = train_data.shape[0] / self.batch_size  # gradient regularization scalar
 
             parameters = {"h_w": h_w, "o_w": o_w, "h_b": h_b, "o_b": o_b}
             dw1, dw2, db1, db2, cost = self._back_propagation(batch_data, batch_labels, parameters)
@@ -54,21 +55,25 @@ class StochasticNetwork(mlp.ShallowNetwork):
             # early stopping
             val_loss: float = self._forward_pass(parameters, val_data, val_labels)[4]
             if val_loss + self.tolerance < least_error:
-                # print(f"Iteration {epoch} improvement from {least_error} to {error}")
                 least_error = val_loss
                 epochs_since_improvement = 0
                 best_model_params: dict[str, np.ndarray] = parameters
             else:
                 epochs_since_improvement += 1
-                # print(f"Iteration {epoch} NO improvement from {least_error} to {error}, "
-                # f"increasing to {epochs_since_improvement}")
 
             epoch += 1
 
         return best_model_params, epoch, least_error, error_history
 
 
-def unison_shuffled_copies(a, b):
-    assert len(a) == len(b)
-    p = np.random.permutation(len(a))
-    return a[p], b[p]
+def _reshuffle_data(data: np.ndarray, labels: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Reshuffle the data and its labels while preserving the relations between them.
+    :param data: a numpy array containing the data
+    :param labels: a numpy array containing the data's labels
+    :return: the same arrays, reshuffled
+    """
+    # this does create and return copies, but shouldn't be a problem
+    assert len(data) == len(labels)
+    indexes = np.random.permutation(len(data))
+    return data[indexes], labels[indexes]

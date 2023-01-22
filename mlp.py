@@ -4,7 +4,7 @@ import numpy as np
 
 class ShallowNetwork:
     """
-    A binary MLP classifier with one hidden layer.
+    A binary MLP classifier with one hidden layer and implemented with early stopping on a validations set.
     """
 
     def __init__(self, input_size: int, hidden_size: int, output_size: int, eta: float, patience: int,
@@ -53,17 +53,20 @@ class ShallowNetwork:
         :return: the number of epochs used, the minimum error found, and the error history
         """
         grad, epoch, last_error, error_history = self._gradient_descent(train_data, train_labels, val_data, val_labels)
-        self.h_w = grad["h_w"]
-        self.o_w = grad["o_w"]
-        self.h_b = grad["h_b"]
-        self.o_b = grad["o_b"]
+
+        # safeguard against arithmetic errors caused, for example, by all batch labels being 0
+        if grad.get("h_w") is not None:
+            self.h_w = grad["h_w"]
+            self.o_w = grad["o_w"]
+            self.h_b = grad["h_b"]
+            self.o_b = grad["o_b"]
 
         return epoch, last_error, error_history
 
     def _gradient_descent(self, train_data: np.ndarray, train_labels: np.ndarray, val_data: np.ndarray,
                           val_labels: np.ndarray) -> tuple[dict[str, np.ndarray], int, float, list[float]]:
         """
-        Implements the entire gradient descent procedure, calculating the gradient and loss.
+        Implements the entire gradient descent procedure, calculating and returning the gradient and loss.
         :param train_data: a numpy array containing the train data
         :param train_labels: a numpy array containing the respective labels for the training data
         :param val_data: a numpy array containing the validation data used for the early stopping algorithm
@@ -75,13 +78,13 @@ class ShallowNetwork:
         epoch: int = 0  # logging
         least_error: float = np.inf
         epochs_since_improvement: int = 0
-        best_model_params = {}
         error_history = []
 
         h_w = self.h_w.copy()
         o_w = self.o_w.copy()
         h_b = self.h_b.copy()
         o_b = self.o_b.copy()
+        best_model_params = {"h_w": h_w, "o_w": o_w, "h_b": h_b, "o_b": o_b}
 
         while epochs_since_improvement <= self.patience:
             parameters = {"h_w": h_w, "o_w": o_w, "h_b": h_b, "o_b": o_b}
@@ -121,14 +124,13 @@ class ShallowNetwork:
         # Backward pass
         m = x.shape[1]
 
-        # output layer activation derivative
+        # output layer backward pass
         dy_hat = self.cost_func_prime(a2, y)
         dz2 = dy_hat * self.activation_func_prime(z2)
-        # something is wrong in the line below, and it fucks the computation under specific circumstances
         dw2: np.ndarray = (1 / m) * a1.T.dot(dz2)
         db2: np.ndarray = (1 / m) * np.sum(dz2, axis=0)
 
-        # hidden layer activation derivative
+        # hidden layer backward pass
         da1 = dz2.dot(parameters["o_w"].T)
         dz1 = da1 * self.activation_func_prime(z1)
         dw1: np.ndarray = (1 / m) * x.T.dot(dz1)
