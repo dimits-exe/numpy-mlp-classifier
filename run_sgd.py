@@ -17,7 +17,7 @@ LEARNING_RATE = 0.2
 start_time = time.process_time()
 np.seterr(all="ignore")  # not debug
 print("Loading data...")
-data = load_data(456)
+data = load_data(130)
 
 print("Training classifier for train loss figure...")
 classifier = StochasticNetwork(input_size=INPUT_SIZE, hidden_size=HIDDEN_SIZE, output_size=OUTPUT_SIZE,

@@ -14,6 +14,7 @@ TOLERANCE = 1e-3
 
 start_time = time.process_time()
 print("Loading data...")
+np.seterr(all="ignore")  # not debug
 data = load_data()
 
 print("Training classifier for train loss figure...")
@@ -66,7 +67,7 @@ for i in range(m_search_count):
                                     cost_func_prime=binary_x_entropy_prime)
         epochs, _, _ = classifier.train(data.x_train, data.y_train, data.x_valid, data.y_valid)
         epochs_needed[i][j] = epochs
-        val_loss[i][j] = classifier.predict(data.x_valid)[1]
+        val_loss[i][j] = classifier.predict(data.x_valid, data.y_valid)[1]
 
 best_index = np.unravel_index(np.nanargmin(val_loss), val_loss.shape)
 best_m = m_values[best_index[0]]

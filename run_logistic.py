@@ -11,6 +11,11 @@ start_time = time.process_time()
 ITERATIONS = 250
 LEARNING_RATE = 0.2
 
+# Extreme lambdas cause arithmetic overflow.
+# As its normal that models with extreme regularization don't learn,
+# we prevent numpy warnings from being spammed in the console.
+np.seterr(all="ignore")
+
 print("Loading data...")
 data = load_data()
 
