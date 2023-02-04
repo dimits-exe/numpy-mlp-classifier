@@ -1,6 +1,6 @@
 from models.sgd import StochasticNetwork
-from load_mnist import load_data
-from common import get_accuracy, sigmoid, sigmoid_prime, binary_x_entropy, binary_x_entropy_prime
+from lib.load_mnist import load_data
+from lib.common import get_accuracy, sigmoid, sigmoid_prime, binary_x_entropy, binary_x_entropy_prime
 
 import time
 import numpy as np

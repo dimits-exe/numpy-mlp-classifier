@@ -1,8 +1,8 @@
 from typing import Callable
 
 from models import mlp
-from load_mnist import load_data
-from common import *
+from lib.load_mnist import load_data
+from lib.common import *
 
 
 def check_hidden_weights(h_w: np.ndarray, x_sample: np.ndarray, t_sample: np.ndarray, network: mlp.ShallowNetwork) \

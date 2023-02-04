@@ -1,6 +1,6 @@
 from models.logistic_regression import LogisticRegClassifier
-from load_mnist import load_data
-from common import get_accuracy
+from lib.load_mnist import load_data
+from lib.common import get_accuracy
 
 import time
 import numpy as np

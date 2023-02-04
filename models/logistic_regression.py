@@ -1,5 +1,5 @@
 import numpy as np
-from common import sigmoid
+from lib.common import sigmoid
 
 
 class LogisticRegClassifier:

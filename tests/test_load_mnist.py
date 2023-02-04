@@ -1,5 +1,5 @@
 from unittest import TestCase
-import load_mnist
+from lib import load_mnist
 import numpy as np
 
 
