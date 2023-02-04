@@ -35,11 +35,16 @@ TOLERANCE = 1e-3
 print("Loading data...")
 data = load_data()
 
-print("Training classifier...")
+# Full documentation for the parameters, their values and their usage is provided in the docstring of the class's constructor.
+# Briefly speaking, we set the number of neurons for each layer of the network, the learning rate, the activation and cost functions
+# as well as the parameters used internally by the early stopping algorithm.
 classifier = ShallowNetwork(input_size=INPUT_SIZE, hidden_size=25, output_size=OUTPUT_SIZE, eta=0.2,
                             patience=PATIENCE, tolerance=TOLERANCE,
                             activation_func=sigmoid, activation_func_prime=sigmoid_prime, cost_func=binary_x_entropy,
                             cost_func_prime=binary_x_entropy_prime)
+
+print("Training classifier...")
+# Includes validation data in order to avoid overfitting 
 epochs, val_error, train_cost_history = classifier.train(data.x_train, data.y_train, data.x_valid, data.y_valid)
 
 # Training results
