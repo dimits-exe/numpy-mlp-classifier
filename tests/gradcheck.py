@@ -1,6 +1,6 @@
 from typing import Callable
 
-import mlp
+from models import mlp
 from load_mnist import load_data
 from common import *
 

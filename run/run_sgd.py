@@ -1,4 +1,4 @@
-from sgd import StochasticNetwork
+from models.sgd import StochasticNetwork
 from load_mnist import load_data
 from common import get_accuracy, sigmoid, sigmoid_prime, binary_x_entropy, binary_x_entropy_prime
 
@@ -43,7 +43,7 @@ plt.ylabel("Cost")
 plt.xlabel("Number of iterations")
 plt.title("Mean Binary Cross Entropy Loss")
 
-path = os.path.join("images", "sgd_error.png")
+path = os.path.join("../images", "sgd_error.png")
 plt.savefig(path)
 print("Train-Loss plot saved in ", path)
 

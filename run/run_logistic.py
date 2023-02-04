@@ -1,4 +1,4 @@
-from logistic_regression import LogisticRegClassifier
+from models.logistic_regression import LogisticRegClassifier
 from load_mnist import load_data
 from common import get_accuracy
 
@@ -49,7 +49,7 @@ ax2.set_ylabel("Cost")
 ax2.set_xlabel("Number of iterations")
 ax2.set_title("Testing")
 
-path = os.path.join("images", "mlp_error.png")
+path = os.path.join("../images", "mlp_error.png")
 plt.savefig(path)
 print("Train/Test loss plot saved in ", path)
 
@@ -89,7 +89,7 @@ plt.plot(lamda_values, val_loss, color="red", marker="D")
 plt.xlabel("Lambda value")
 plt.ylabel("Validation Loss")
 
-plt.savefig(os.path.join("images", "logistic_lambda_accuracy.png"))
+plt.savefig(os.path.join("../images", "logistic_lambda_accuracy.png"))
 print("Lambda-loss plot saved successfully")
 
 end_time = time.process_time()
